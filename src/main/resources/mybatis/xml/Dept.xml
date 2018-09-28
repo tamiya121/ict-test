@@ -6,10 +6,14 @@
 
   <select id="selectDept" resultType="dept" parameterType="dept">
     select * from Dept
-    where deptno = #{deptno}
-    <if test="deptname!=null">
-    	and deptname = #{deptname}
-    </if>
+    <where>
+    	<if test="deptname!=null">
+    		and deptname = #{deptname}
+    	</if>
+    	<if test="deptno!=null">
+    		and deptno = #{deptno}
+    	</if>
+    </where>
   </select>
   
 </mapper>

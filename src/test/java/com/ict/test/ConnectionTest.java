@@ -1,32 +1,46 @@
 package com.ict.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
-import javax.sql.DataSource;
-
+import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class ConnectionTest {
+import com.ict.test.vo.Dept;
+import com.zaxxer.hikari.HikariDataSource;
 
+public class ConnectionTest {
+	private ApplicationContext ac = new ClassPathXmlApplicationContext("classpath:root-context.xml");
+	
 	@Test
-	public void test() {
-		ApplicationContext ac = new ClassPathXmlApplicationContext("classpath:root-context.xml");
-		DataSource ds = (DataSource)ac.getBean("hkds");
-		String sql = "select count(1) from emp";
-		try(Connection con = ds.getConnection()){
-			try(ResultSet rs = con.createStatement().executeQuery(sql)){
-				rs.next();
-				assertEquals(14,rs.getInt(1));
-			}
-		}catch(SQLException e) {
+	public void conTest() {
+		HikariDataSource hds = (HikariDataSource) ac.getBean("hkds");
+		Connection con = null;
+		try {
+			con = hds.getConnection();
+			System.out.println("연결 성공");
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		assertNotNull(con);
 	}
+	
+	
+	@Test
+	public void sqlTest() {
+		SqlSession ss = (SqlSession)ac.getBean("sqlSessionTemplate");
 
+		Dept d = new Dept();
+		d.setDeptno(10);
+		List<Dept> list = ss.selectList("DEPT.selectDept",d);
+		
+		assertEquals(list.size(), 1);
+	}
 }
